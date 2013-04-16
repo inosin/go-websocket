@@ -1,0 +1,83 @@
+<html>  
+<head>
+  <title>Websocket test html page</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    var sock1;
+    var wsuri = "ws://127.0.0.1:8080";
+    window.onload = function() {
+      log("window onload");
+      if (!sock1) { sock1 = new WebSocket(wsuri); }
+      sock1.onopen = function() {
+        sock1.send('Test1 open');
+        log("Test1: connected to " + wsuri);
+      }
+      sock1.onclose = function(e) {
+        sock1.send('Test1 closed');
+        log("Test1: connection closed (" + e.code + ")");
+      }
+      sock1.onmessage = function(msg) {
+        log("Test1: message received: " + msg.data);
+      }
+
+      // test2 used
+      var sock2;
+      $("#connect").click(function(event){
+        if (!sock2) {
+          sock2 = new WebSocket(wsuri);
+        } else {
+          log("Test2: been connected .");
+        }
+        sock2.onopen = function(){
+          sock2.send('Test2 open');
+          log("Test2: connected to " + wsuri);
+        }
+        sock2.onclose = function(e) {
+          sock2.send('Test2 closed');
+          sock2 = null;
+          log("Test2: connection closed (" + e.code + ")");
+        }
+        sock2.onmessage = function(msg){
+          log("Test2: message received: " + msg.data);
+        }
+      });
+
+      $("#send").click(function(event){
+        if (sock2 == null) {
+          log("Test2: Not connected")
+        } else {
+          sock2.send("Test2: send from client");
+        }
+      });
+
+      $("#close").click(function(event){
+        if (sock2 != null) {
+          sock2.close();
+        } else {
+          log("Test2: Not connected.")
+        }
+      })
+    };
+    function send() {
+      sock1.send($('#message').val());
+    };
+    function log(msg) {
+      $('#log').prepend(msg + "\n");
+    }
+  </script>
+  <style>
+  #log {border: 1px solid #eee; padding: 5px; width: 60%; max-height: 300px; overflow:scroll; background-color: #f5f5f5; color: #e00000; line-height: 180%; }
+  </style>
+</head>
+<body>  
+  <h1>WebSocket Echo Test1</h1>
+  Message: <input id="message" type="text" value="Hello, world!">
+  <button onclick="send();">Send Message</button>
+  <h1>WebSocket Echo Test2</h1>
+  <input type="button" id="connect" value="websocket connect" />
+  <input type="button" id="send" value="websocket send" />
+  <input type="button" id="close" value="websocket close" />
+  <h2>Console Logs:</h2>
+  <pre id="log"></pre>
+</body>
+</html>
